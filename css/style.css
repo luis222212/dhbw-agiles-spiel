@@ -21,6 +21,17 @@
     --radius: 16px;
     --radius-sm: 10px;
     --transition: 0.3s cubic-bezier(.4, 0, .2, 1);
+
+    /* Tier-Farben (Pastell) */
+    --tier-green-bg: #e8f5e3;
+    --tier-green-border: #7da576;
+    --tier-green-text: #4a704a;
+    --tier-yellow-bg: #fef9e7;
+    --tier-yellow-border: #d4a843;
+    --tier-yellow-text: #7a6520;
+    --tier-red-bg: #fce8e8;
+    --tier-red-border: #c96b6b;
+    --tier-red-text: #7a3535;
 }
 
 /* =========================================================
@@ -42,7 +53,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     overflow-x: hidden;
     padding: 20px;
 }
@@ -203,7 +214,7 @@ body::after {
 #game-screen {
     display: none;
     width: 100%;
-    max-width: 680px;
+    max-width: 960px;
     animation: fadeUp 0.5s ease-out;
 }
 
@@ -212,6 +223,8 @@ body::after {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
     margin-bottom: 20px;
     padding: 14px 20px;
 }
@@ -240,10 +253,50 @@ body::after {
     color: var(--matcha-dark);
 }
 
+/* Legend (Tier anzeige) */
+.legend {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--text-light);
+}
+
+.legend-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    border: 2px solid;
+}
+
+.legend-dot.green {
+    background: var(--tier-green-bg);
+    border-color: var(--tier-green-border);
+}
+
+.legend-dot.yellow {
+    background: var(--tier-yellow-bg);
+    border-color: var(--tier-yellow-border);
+}
+
+.legend-dot.red {
+    background: var(--tier-red-bg);
+    border-color: var(--tier-red-border);
+}
+
 /* Board Grid */
 #board {
     display: grid;
-    gap: 12px;
+    gap: 10px;
     padding: 4px;
 }
 
@@ -254,6 +307,7 @@ body::after {
     perspective: 800px;
     cursor: pointer;
     aspect-ratio: 3 / 4;
+    min-height: 0;
 }
 
 .card-inner {
@@ -278,13 +332,15 @@ body::after {
     backface-visibility: hidden;
     border-radius: var(--radius-sm);
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 12px;
+    padding: 10px 8px;
     text-align: center;
-    font-size: 0.85rem;
+    font-size: 0.78rem;
     font-weight: 500;
-    line-height: 1.35;
+    line-height: 1.3;
+    overflow: hidden;
 }
 
 /* BACK (hidden by default, visible when flipped) */
@@ -295,17 +351,73 @@ body::after {
 }
 
 .card-back .card-pattern {
-    font-size: 2rem;
+    font-size: 1.6rem;
     opacity: 0.65;
+}
+
+/* Tier-Streifen auf Kartenrücken */
+.card-back .tier-stripe {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+}
+
+.card-back .tier-stripe.green {
+    background: var(--tier-green-border);
+}
+
+.card-back .tier-stripe.yellow {
+    background: var(--tier-yellow-border);
+}
+
+.card-back .tier-stripe.red {
+    background: var(--tier-red-border);
 }
 
 /* FRONT (text content) */
 .card-front {
     background: var(--white);
     color: var(--text);
-    border: 1px solid var(--light-gray);
+    border: 2px solid var(--light-gray);
     box-shadow: var(--shadow-card);
     transform: rotateY(180deg);
+}
+
+/* ── Tier-Farben auf der Vorderseite ── */
+.card-front.tier-green {
+    background: var(--tier-green-bg);
+    border-color: var(--tier-green-border);
+    color: var(--tier-green-text);
+}
+
+.card-front.tier-yellow {
+    background: var(--tier-yellow-bg);
+    border-color: var(--tier-yellow-border);
+    color: var(--tier-yellow-text);
+}
+
+.card-front.tier-red {
+    background: var(--tier-red-bg);
+    border-color: var(--tier-red-border);
+    color: var(--tier-red-text);
+}
+
+/* ── Bild auf Karte ── */
+.card-img {
+    max-width: 85%;
+    max-height: 50%;
+    object-fit: contain;
+    border-radius: 6px;
+    margin-bottom: 6px;
+    flex-shrink: 0;
+}
+
+.card-text {
+    flex: 0 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Card states */
@@ -314,9 +426,7 @@ body::after {
 }
 
 .card.matched .card-front {
-    background: var(--matcha-light);
-    border-color: var(--matcha);
-    color: var(--matcha-dark);
+    opacity: 0.7;
 }
 
 .card.matched .card-inner {
@@ -548,7 +658,7 @@ body::after {
 /* =========================================================
    RESPONSIVE TWEAKS
    ========================================================= */
-@media (max-width: 480px) {
+@media (max-width: 600px) {
 
     #start-screen,
     #end-screen {
@@ -568,11 +678,30 @@ body::after {
     }
 
     #board {
-        gap: 8px;
+        gap: 6px;
     }
 
     .card-face {
-        font-size: 0.75rem;
-        padding: 8px;
+        font-size: 0.65rem;
+        padding: 6px 4px;
+    }
+
+    .card-img {
+        max-height: 40%;
+    }
+}
+
+@media (max-width: 400px) {
+    .card-face {
+        font-size: 0.58rem;
+        padding: 4px 3px;
+    }
+
+    .card-img {
+        max-height: 35%;
+    }
+
+    #board {
+        gap: 4px;
     }
 }

@@ -15,6 +15,7 @@ const endTitle = document.getElementById('end-title');
 const endMessage = document.getElementById('end-message');
 const finalScoreEl = document.getElementById('final-score');
 const finalTimeEl = document.getElementById('final-time');
+const legendEl = document.getElementById('legend');
 
 /* ===========================================================
    GAME STATE
@@ -27,7 +28,33 @@ let score = 0;
 let timeLeft = 60;
 let timerInterval = null;
 let lockBoard = false;
-let quizCardsTotal = 0;
+
+/* ===========================================================
+   DIFFICULTY CONFIG
+   =========================================================== */
+const DIFFICULTY_CONFIG = {
+    easy: {
+        pairs: GREEN_PAIRS,           // 12 grüne Paare
+        time: 90,
+        quiz: false,
+        cols: 6,
+        label: 'Leicht'
+    },
+    medium: {
+        pairs: [...GREEN_PAIRS, ...YELLOW_PAIRS],   // 23 Paare
+        time: 180,
+        quiz: true,
+        cols: 8,
+        label: 'Mittel'
+    },
+    hard: {
+        pairs: ALL_PAIRS,             // 32 Paare
+        time: 300,
+        quiz: true,
+        cols: 8,
+        label: 'Schwer'
+    }
+};
 
 /* ===========================================================
    UTILITY  –  Shuffle (Fisher-Yates)
@@ -54,43 +81,62 @@ function startGame() {
     // Reset state
     matchedCount = 0;
     score = 0;
-    timeLeft = 60;
     flippedCards = [];
     lockBoard = false;
     cards = [];
     boardEl.innerHTML = '';
 
-    const difficulty = diffSelect.value;            // 'easy' | 'medium'
-    const pairCount = difficulty === 'easy' ? 3 : 5;
-    const addQuiz = difficulty === 'medium';
+    const difficulty = diffSelect.value;
+    const config = DIFFICULTY_CONFIG[difficulty];
+    const selectedPairs = shuffle([...config.pairs]);
+    totalPairs = selectedPairs.length;
+    timeLeft = config.time;
 
-    // Pick random pairs
-    const selectedPairs = shuffle([...ALL_PAIRS]).slice(0, pairCount);
-    totalPairs = pairCount;
+    // Track which tiers are used (for the legend)
+    const activeTiers = new Set();
 
     // Build card array: each pair → 2 cards sharing a pairId
     selectedPairs.forEach((pair, i) => {
-        cards.push({ id: `p${i}-a`, pairId: i, text: pair.term, type: 'normal' });
-        cards.push({ id: `p${i}-b`, pairId: i, text: pair.match, type: 'normal' });
+        activeTiers.add(pair.tier);
+        cards.push({
+            id: `p${i}-a`,
+            pairId: i,
+            text: pair.term,
+            type: 'normal',
+            tier: pair.tier,
+            image: pair.image || null
+        });
+        cards.push({
+            id: `p${i}-b`,
+            pairId: i,
+            text: pair.match,
+            type: 'normal',
+            tier: pair.tier,
+            image: null   // image only on term card
+        });
     });
 
-    // Add quiz cards (2 cards with unique type)
-    quizCardsTotal = 0;
-    if (addQuiz) {
-        // We insert 2 quiz cards; each acts independently
-        cards.push({ id: 'quiz-1', pairId: -1, text: '❓ Quiz-Karte', type: 'quiz' });
-        cards.push({ id: 'quiz-2', pairId: -2, text: '❓ Quiz-Karte', type: 'quiz' });
-        quizCardsTotal = 2;
+    // Add quiz cards on medium/hard
+    if (config.quiz) {
+        cards.push({ id: 'quiz-1', pairId: -1, text: '❓ Quiz-Karte', type: 'quiz', tier: null });
+        cards.push({ id: 'quiz-2', pairId: -2, text: '❓ Quiz-Karte', type: 'quiz', tier: null });
     }
 
     shuffle(cards);
 
-    // Set grid columns based on total cards
+    // Set grid columns
     const total = cards.length;
-    let cols = 4;
-    if (total <= 6) cols = 3;
-    if (total <= 4) cols = 2;
+    let cols = config.cols;
+    // For smaller screens, limit columns
+    if (window.innerWidth < 500) {
+        cols = Math.min(cols, 4);
+    } else if (window.innerWidth < 700) {
+        cols = Math.min(cols, 6);
+    }
     boardEl.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+
+    // Build legend
+    buildLegend(activeTiers);
 
     // Render cards
     cards.forEach((card) => {
@@ -101,14 +147,23 @@ function startGame() {
         el.dataset.type = card.type;
 
         const isQuiz = card.type === 'quiz';
+        const tierClass = card.tier ? `tier-${card.tier}` : '';
+
+        // Build front content
+        let frontContent = '';
+        if (card.image) {
+            frontContent += `<img src="${card.image}" class="card-img" alt="" onerror="this.style.display='none'" />`;
+        }
+        frontContent += `<span class="card-text">${card.text}</span>`;
 
         el.innerHTML = `
           <div class="card-inner">
             <div class="card-face card-back ${isQuiz ? 'quiz-back' : ''}">
               <span class="card-pattern">${isQuiz ? '❓' : '🍃'}</span>
+              ${!isQuiz && card.tier ? `<span class="tier-stripe ${card.tier}"></span>` : ''}
             </div>
-            <div class="card-face card-front ${isQuiz ? 'quiz-face' : ''}">
-              ${card.text}
+            <div class="card-face card-front ${isQuiz ? 'quiz-face' : tierClass}">
+              ${isQuiz ? card.text : frontContent}
             </div>
           </div>
         `;
@@ -127,6 +182,24 @@ function startGame() {
 
     // Start timer
     startTimer();
+}
+
+/* ===========================================================
+   LEGEND
+   =========================================================== */
+function buildLegend(activeTiers) {
+    if (!legendEl) return;
+    legendEl.innerHTML = '';
+    const tierOrder = ['green', 'yellow', 'red'];
+    tierOrder.forEach(tier => {
+        if (!activeTiers.has(tier)) return;
+        const pts = TIER_POINTS[tier];
+        const label = TIER_LABELS[tier];
+        const item = document.createElement('div');
+        item.className = 'legend-item';
+        item.innerHTML = `<span class="legend-dot ${tier}"></span>${label} (${pts} Pkt.)`;
+        legendEl.appendChild(item);
+    });
 }
 
 /* ===========================================================
@@ -155,20 +228,16 @@ function startTimer() {
    CARD CLICK HANDLER
    =========================================================== */
 function handleCardClick(el, card) {
-    // Ignore clicks on matched, already-flipped, or during lock
     if (lockBoard) return;
     if (el.classList.contains('flipped') || el.classList.contains('matched')) return;
 
-    // Flip card
     el.classList.add('flipped');
 
     // ---- QUIZ CARD ----
     if (card.type === 'quiz') {
         lockBoard = true;
-        // Short delay so flip animation finishes
         setTimeout(() => {
             showQuizModal(() => {
-                // After quiz is answered, remove the quiz card from board
                 el.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
                 el.style.opacity = '0';
                 el.style.transform = 'scale(0.8)';
@@ -194,7 +263,10 @@ function handleCardClick(el, card) {
             first.el.classList.add('matched');
             second.el.classList.add('matched');
             matchedCount++;
-            addScore(100);
+
+            // Points based on tier
+            const pts = TIER_POINTS[first.card.tier] || 100;
+            addScore(pts);
             addTime(5, first.el);
             flippedCards = [];
             lockBoard = false;
@@ -204,7 +276,7 @@ function handleCardClick(el, card) {
                 setTimeout(() => endGame(true), 600);
             }
         } else {
-            // ❌ No match – flip back
+            // ❌ No match
             setTimeout(() => {
                 first.el.classList.remove('flipped');
                 second.el.classList.remove('flipped');
@@ -255,7 +327,6 @@ function showBonusFloat(text, anchorEl) {
 function showQuizModal(onClose) {
     const q = QUIZ_QUESTIONS[Math.floor(Math.random() * QUIZ_QUESTIONS.length)];
 
-    // Build overlay
     const overlay = document.createElement('div');
     overlay.className = 'modal-overlay';
 
@@ -275,7 +346,6 @@ function showQuizModal(onClose) {
         btn.className = 'choice-btn';
         btn.textContent = choice.text;
         btn.addEventListener('click', () => {
-            // Disable all buttons
             choicesDiv.querySelectorAll('.choice-btn').forEach(b => {
                 b.disabled = true;
                 b.style.pointerEvents = 'none';
@@ -287,13 +357,11 @@ function showQuizModal(onClose) {
                 addTime(15, modal);
             } else {
                 btn.classList.add('wrong');
-                // Find the correct one and highlight it
                 const correctBtn = [...choicesDiv.querySelectorAll('.choice-btn')]
                     .find((b) => b.textContent === q.choices.find(c => c.correct).text);
                 if (correctBtn) correctBtn.classList.add('correct');
             }
 
-            // Close modal after short delay
             setTimeout(() => {
                 overlay.remove();
                 onClose();
