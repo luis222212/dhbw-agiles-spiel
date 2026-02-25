@@ -20,7 +20,7 @@
        TEAM SETUP SCREEN
        =========================== -->
     <div id="team-setup-screen" class="glass">
-        <div class="logo">Match<span>Mind</span></div>
+        <img src="Logo.png" alt="MatchMind Logo" class="logo-img" />
         <p class="tagline">Teams einrichten</p>
 
         <div class="form-group">
@@ -44,10 +44,10 @@
        START SCREEN
        =========================== -->
     <div id="start-screen" class="glass">
-        <div class="logo">Match<span>Mind</span></div>
+        <img src="Logo.png" alt="MatchMind Logo" class="logo-img" />
         <p class="tagline">Finde deinen Weg</p>
 
-        <details style="margin: 20px 0; text-align: left; max-width: 600px;">
+        <details style="margin: 20px 0; text-align: left; max-width: 900px; width: 100%;">
             <summary style="cursor: pointer; font-weight: 600; font-size: 1.1rem; margin-bottom: 10px; text-align: center;">📖 Anleitung</summary>
             <div style="padding: 15px; line-height: 1.6; font-size: 0.95rem;">
                 <p style="margin-bottom: 15px;"><strong>🎮 MatchMind</strong><br>
@@ -68,15 +68,33 @@
                 </ul>
                 <p style="margin-bottom: 15px;">Nach der Auswahl wird das Spiel gestartet. Das Spielfeld erscheint mit allen Karten verdeckt. Jede Partie beginnt mit einem Starttimer von 45 Sekunden.</p>
 
+                <div style="text-align: center; margin: 15px 0;">
+                    <img src="auswahl.png" alt="Spielmodusauswahl" style="max-width: 100%; border-radius: 8px;" />
+                </div>
+
                 <p style="margin-bottom: 10px;"><strong>🔄 Spielablauf – Phase 1: Memo-Runde</strong></p>
+                <p style="margin-bottom: 10px;">Die Spieler sind abwechselnd am Zug und decken jeweils zwei Karten auf. Stimmen die Karten überein, gilt das Paar als gefunden und der Spieler erhält Bonuszeit, abhängig vom Schwierigkeitsgrad der Karten:</p>
                 <ul style="margin: 10px 0 15px 20px;">
-                    <li>Die Spieler sind abwechselnd am Zug.</li>
-                    <li>Ein Spieler deckt zwei Karten auf.</li>
-                    <li>Stimmen die Karten überein, gilt das Paar als gefunden.</li>
-                    <li>Für jedes gefundene Paar erhält der Spieler +3 Sekunden Bonuszeit.</li>
-                    <li>Stimmen die Karten nicht überein, werden sie wieder verdeckt und der nächste Spieler ist an der Reihe.</li>
-                    <li>Sobald alle Kartenpaare gefunden wurden, beginnt automatisch die zweite Phase.</li>
+                    <li>Leicht: +3 Sekunden (grün)</li>
+                    <li>Mittel: +5 Sekunden (orange)</li>
+                    <li>Schwer: +8 Sekunden (rot)</li>
                 </ul>
+                <p style="margin-bottom: 15px;">Stimmen die Karten nicht überein, werden sie wieder verdeckt und der nächste Spieler ist an der Reihe. Sobald alle Kartenpaare gefunden wurden, startet automatisch die zweite Spielphase.</p>
+
+                <div style="display: flex; justify-content: center; gap: 24px; margin: 15px 0; flex-wrap: wrap;">
+                    <div style="text-align: center;">
+                        <img src="leicht.png" alt="Leicht" style="max-width: 120px; border-radius: 8px; display: block;" />
+                        <div style="margin-top: 6px; font-weight: 600;">Leicht</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <img src="mittel.png" alt="Mittel" style="max-width: 120px; border-radius: 8px; display: block;" />
+                        <div style="margin-top: 6px; font-weight: 600;">Mittel</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <img src="schwer.png" alt="Schwer" style="max-width: 120px; border-radius: 8px; display: block;" />
+                        <div style="margin-top: 6px; font-weight: 600;">Schwer</div>
+                    </div>
+                </div>
 
                 <p style="margin-bottom: 10px;"><strong>🧠 Spielablauf – Phase 2: Quiz-Runde</strong></p>
                 <p style="margin-bottom: 10px;">In der Quiz-Runde müssen die Spieler Fragen zu den Inhalten beantworten, die zuvor auf den Karten zu sehen waren.</p>
@@ -87,6 +105,10 @@
                     <li>Jede falsch beantwortete Frage zieht dir 5 Sekunden ab.</li>
                 </ul>
 
+                <div style="text-align: center; margin: 15px 0;">
+                    <img src="quiz.png" alt="Quiz-Runde" style="max-width: 100%; border-radius: 8px;" />
+                </div>
+
                 <p style="margin-bottom: 10px;"><strong>🏁 Spielende</strong></p>
                 <p style="margin-bottom: 10px;">Das Spiel endet, wenn der Timer abgelaufen ist oder alle Quizfragen beantwortet wurden.</p>
                 <p style="margin-bottom: 10px;">Gewinner ist die Person, die:</p>
@@ -94,7 +116,11 @@
                     <li>die meisten Fragen richtig beantwortet hat</li>
                     <li>und somit die höchste Gesamtpunktzahl erreicht</li>
                 </ul>
-                <p>Bei Gleichstand können die betroffenen Spieler eine zusätzliche Stichfrage erhalten.</p>
+                <p style="margin-bottom: 15px;">Bei Gleichstand können die betroffenen Spieler eine zusätzliche Stichfrage erhalten.</p>
+
+                <div style="text-align: center; margin: 15px 0;">
+                    <img src="ende.png" alt="Spielende" style="max-width: 100%; border-radius: 8px;" />
+                </div>
             </div>
         </details>
 
@@ -121,6 +147,7 @@
        =========================== -->
     <div id="game-screen">
         <div class="phase-banner glass">
+            <img src="Bild.png" alt="MatchMind Logo" class="logo-img-sm" />
             <span class="phase-icon">📖</span>
             <span class="phase-text">Phase 1 – Lernphase</span>
         </div>
@@ -164,6 +191,7 @@
        TRANSITION SCREEN
        =========================== -->
     <div id="transition-screen" class="glass">
+        <img src="Bild.png" alt="MatchMind Logo" class="logo-img" />
         <div class="trophy">🎓</div>
         <h2>Lernphase abgeschlossen!</h2>
         <p class="result-text">
@@ -183,6 +211,7 @@
        =========================== -->
     <div id="quiz-screen">
         <div class="phase-banner glass phase-quiz">
+            <img src="Bild.png" alt="MatchMind Logo" class="logo-img-sm" />
             <span class="phase-icon">⚡</span>
             <span class="phase-text">Phase 2 – Quiz</span>
         </div>
@@ -231,6 +260,7 @@
        END SCREEN
        =========================== -->
     <div id="end-screen" class="glass">
+        <img src="Bild.png" alt="MatchMind Logo" class="logo-img" />
         <div class="trophy">🏆</div>
         <h2 id="end-title">Geschafft!</h2>
         <p class="result-text" id="end-message">Du hast alle Fragen beantwortet.</p>
