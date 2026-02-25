@@ -2,6 +2,10 @@
    DOM REFERENCES
    =========================================================== */
 const startScreen = document.getElementById('start-screen');
+const teamSetupScreen = document.getElementById('team-setup-screen');
+const teamCountSelect = document.getElementById('team-count');
+const teamNamesContainer = document.getElementById('team-names-container');
+const btnStartGame = document.getElementById('btn-start-game');
 const gameScreen = document.getElementById('game-screen');
 const transitionScreen = document.getElementById('transition-screen');
 const quizScreen = document.getElementById('quiz-screen');
@@ -34,6 +38,9 @@ const endMessage = document.getElementById('end-message');
 const finalScoreEl = document.getElementById('final-score');
 const finalCorrectEl = document.getElementById('final-correct');
 const finalTimeEl = document.getElementById('final-time');
+const currentTeamDisplay = document.getElementById('current-team-display');
+const quizCurrentTeamEl = document.getElementById('quiz-current-team');
+const teamResultsEl = document.getElementById('team-results');
 
 /* ===========================================================
    GAME STATE
@@ -51,6 +58,8 @@ let currentQuizIndex = 0;
 let quizQuestions = [];
 let timerInterval = null;
 let lockBoard = false;
+let teams = [];            // [{name, score}, ...]
+let currentTeamIndex = 0;
 
 /* ===========================================================
    BASE TIME & TIME BONUSES
@@ -105,6 +114,7 @@ function shuffle(arr) {
    =========================================================== */
 function hideAll() {
     startScreen.style.display = 'none';
+    teamSetupScreen.style.display = 'none';
     gameScreen.style.display = 'none';
     transitionScreen.style.display = 'none';
     quizScreen.style.display = 'none';
@@ -121,10 +131,44 @@ function showScreen(el) {
 /* ===========================================================
    INIT  –  Event Listeners
    =========================================================== */
-btnStart.addEventListener('click', startPhase1);
+btnStart.addEventListener('click', showTeamSetup);
 btnStartQuiz.addEventListener('click', startPhase2);
 btnRestart.addEventListener('click', () => showScreen(startScreen));
 btnSkipToQuiz.addEventListener('click', () => showTransition());
+
+/* ===========================================================
+   TEAM SETUP
+   =========================================================== */
+function showTeamSetup() {
+    showScreen(teamSetupScreen);
+    renderTeamNameInputs();
+}
+
+function renderTeamNameInputs() {
+    const count = parseInt(teamCountSelect.value);
+    teamNamesContainer.innerHTML = '';
+    for (let i = 1; i <= count; i++) {
+        const group = document.createElement('div');
+        group.className = 'form-group';
+        group.innerHTML = `
+            <label>Team ${i} Name</label>
+            <input type="text" class="team-name-input" placeholder="Team ${i}" maxlength="20" />
+        `;
+        teamNamesContainer.appendChild(group);
+    }
+}
+
+teamCountSelect.addEventListener('change', renderTeamNameInputs);
+
+btnStartGame.addEventListener('click', () => {
+    const inputs = teamNamesContainer.querySelectorAll('.team-name-input');
+    teams = Array.from(inputs).map((inp, i) => ({
+        name: inp.value.trim() || `Team ${i + 1}`,
+        score: 0,
+    }));
+    currentTeamIndex = 0;
+    startPhase1();
+});
 
 /* ═══════════════════════════════════════════════════════════
    ██  PHASE 1: MEMORY (Lernphase)
@@ -137,6 +181,8 @@ function startPhase1() {
     lockBoard = false;
     cards = [];
     boardEl.innerHTML = '';
+    currentTeamIndex = 0;
+    teams.forEach(t => t.score = 0);
 
     const difficulty = diffSelect.value;
     const config = DIFFICULTY_CONFIG[difficulty];
@@ -202,6 +248,7 @@ function startPhase1() {
     // HUD
     timerEl.textContent = accumulatedTime;
     pairsLeftEl.textContent = totalPairs;
+    if (currentTeamDisplay) currentTeamDisplay.textContent = teams[0]?.name || '–';
 
     showScreen(gameScreen);
 }
@@ -265,6 +312,8 @@ function handleCardClick(el, card) {
                 second.el.classList.remove('flipped');
                 flippedCards = [];
                 lockBoard = false;
+                currentTeamIndex = (currentTeamIndex + 1) % Math.max(teams.length, 1);
+                if (currentTeamDisplay) currentTeamDisplay.textContent = teams[currentTeamIndex]?.name || '–';
             }, 900);
         }
     }
@@ -313,6 +362,8 @@ function startPhase2() {
     quizTimerEl.textContent = quizTimeLeft;
     quizScoreEl.textContent = 0;
     quizProgressEl.textContent = `1/${quizTotal}`;
+    currentTeamIndex = 0;
+    if (quizCurrentTeamEl) quizCurrentTeamEl.textContent = teams[0]?.name || '–';
 
     showScreen(quizScreen);
     showQuizQuestion();
@@ -378,6 +429,7 @@ function showQuizQuestion() {
             if (choice.correct) {
                 btn.classList.add('correct');
                 quizScore += 100;
+                teams[currentTeamIndex].score += 100;
                 quizCorrect++;
                 quizScoreEl.textContent = quizScore;
             } else {
@@ -400,6 +452,8 @@ function showQuizQuestion() {
             // Next question after delay
             setTimeout(() => {
                 currentQuizIndex++;
+                currentTeamIndex = (currentTeamIndex + 1) % Math.max(teams.length, 1);
+                if (quizCurrentTeamEl) quizCurrentTeamEl.textContent = teams[currentTeamIndex]?.name || '–';
                 showQuizQuestion();
             }, 1000);
         });
@@ -425,6 +479,17 @@ function endGame(allAnswered) {
     finalScoreEl.textContent = quizScore;
     finalCorrectEl.textContent = `${quizCorrect}/${quizTotal}`;
     finalTimeEl.textContent = allAnswered ? `${quizTimeLeft}s` : '0s';
+
+    if (teamResultsEl && teams.length > 0) {
+        const sorted = [...teams].sort((a, b) => b.score - a.score);
+        const medals = ['🥇', '🥈', '🥉', '4️⃣'];
+        teamResultsEl.innerHTML =
+            '<h3 style="margin-bottom:10px;color:var(--matcha-dark);">Team-Ergebnis</h3>' +
+            sorted.map((t, i) =>
+                `<div class="team-result-item${i === 0 ? ' winner' : ''}">${medals[i] || ''} ${t.name}: ${t.score} Punkte</div>`
+            ).join('');
+        endTitle.textContent = `🏆 ${sorted[0].name} gewinnt!`;
+    }
 
     showScreen(endScreen);
 }

@@ -17,6 +17,30 @@
 <body>
 
     <!-- ===========================
+       TEAM SETUP SCREEN
+       =========================== -->
+    <div id="team-setup-screen" class="glass">
+        <div class="logo">Match<span>Mind</span></div>
+        <p class="tagline">Teams einrichten</p>
+
+        <div class="form-group">
+            <label for="team-count">Anzahl der Teams</label>
+            <select id="team-count">
+                <option value="2">2 Teams</option>
+                <option value="3">3 Teams</option>
+                <option value="4">4 Teams</option>
+            </select>
+        </div>
+
+        <div id="team-names-container"></div>
+
+        <button id="btn-start-game" class="btn-primary">🚀 Spiel starten</button>
+        <button onclick="location.reload()" class="btn-primary" style="margin-top: 10px;">
+            🔄 Seite neu laden
+        </button>
+    </div>
+
+    <!-- ===========================
        START SCREEN
        =========================== -->
     <div id="start-screen" class="glass">
@@ -85,7 +109,7 @@
         </div>
 
         <button id="btn-start" class="btn-primary">
-            🚀 Spiel starten
+            ➡️ Weiter
         </button>
         <button onclick="location.reload()" class="btn-primary" style="margin-top: 10px;">
             🔄 Seite neu laden
@@ -114,6 +138,13 @@
                 <div>
                     <div class="hud-label">Paare</div>
                     <div class="hud-value" id="pairs-left">0</div>
+                </div>
+            </div>
+            <div class="hud-item">
+                <span class="hud-icon">👥</span>
+                <div>
+                    <div class="hud-label">Am Zug</div>
+                    <div class="hud-value" id="current-team-display">–</div>
                 </div>
             </div>
         </div>
@@ -178,6 +209,13 @@
                     <div class="hud-value" id="quiz-progress">1/10</div>
                 </div>
             </div>
+            <div class="hud-item">
+                <span class="hud-icon">👥</span>
+                <div>
+                    <div class="hud-label">Team</div>
+                    <div class="hud-value" id="quiz-current-team">–</div>
+                </div>
+            </div>
         </div>
 
         <div class="quiz-card glass" id="quiz-card">
@@ -210,6 +248,7 @@
                 <div class="stat-label">Restzeit</div>
             </div>
         </div>
+        <div id="team-results"></div>
         <button id="btn-restart" class="btn-primary">🔄 Nochmal spielen</button>
         <button onclick="location.reload()" class="btn-primary" style="margin-top: 10px;">
             🔄 Seite neu laden
