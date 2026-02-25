@@ -3,19 +3,37 @@
    =========================================================== */
 const startScreen = document.getElementById('start-screen');
 const gameScreen = document.getElementById('game-screen');
+const transitionScreen = document.getElementById('transition-screen');
+const quizScreen = document.getElementById('quiz-screen');
 const endScreen = document.getElementById('end-screen');
+
+// Memory (Phase 1)
 const boardEl = document.getElementById('board');
 const timerEl = document.getElementById('timer');
-const scoreEl = document.getElementById('score');
 const pairsLeftEl = document.getElementById('pairs-left');
+const legendEl = document.getElementById('legend');
+const btnSkipToQuiz = document.getElementById('btn-skip-to-quiz');
+
+// Transition
+const transitionTimeEl = document.getElementById('transition-time');
+const btnStartQuiz = document.getElementById('btn-start-quiz');
+
+// Quiz (Phase 2)
+const quizTimerEl = document.getElementById('quiz-timer');
+const quizScoreEl = document.getElementById('quiz-score');
+const quizProgressEl = document.getElementById('quiz-progress');
+const quizQuestionEl = document.getElementById('quiz-question');
+const quizChoicesEl = document.getElementById('quiz-choices');
+
+// Common
 const diffSelect = document.getElementById('difficulty');
 const btnStart = document.getElementById('btn-start');
 const btnRestart = document.getElementById('btn-restart');
 const endTitle = document.getElementById('end-title');
 const endMessage = document.getElementById('end-message');
 const finalScoreEl = document.getElementById('final-score');
+const finalCorrectEl = document.getElementById('final-correct');
 const finalTimeEl = document.getElementById('final-time');
-const legendEl = document.getElementById('legend');
 
 /* ===========================================================
    GAME STATE
@@ -24,42 +42,50 @@ let cards = [];
 let flippedCards = [];
 let matchedCount = 0;
 let totalPairs = 0;
-let score = 0;
-let timeLeft = 60;
+let accumulatedTime = 0;   // Zeit-Bank (Phase 1)
+let quizTimeLeft = 0;      // Countdown (Phase 2)
+let quizScore = 0;
+let quizCorrect = 0;
+let quizTotal = 0;
+let currentQuizIndex = 0;
+let quizQuestions = [];
 let timerInterval = null;
 let lockBoard = false;
+
+/* ===========================================================
+   BASE TIME & TIME BONUSES
+   =========================================================== */
+const BASE_TIME = 45;  // Sekunden Startguthaben
+
+const TIER_TIME_BONUS = {
+    green: 3,
+    yellow: 5,
+    red: 8,
+};
 
 /* ===========================================================
    DIFFICULTY CONFIG
    =========================================================== */
 const DIFFICULTY_CONFIG = {
     'very-easy': {
-        pairs: GREEN_PAIRS.slice(0, 8),   // 8 grüne Paare
-        time: 60,
-        quiz: false,
+        pairs: GREEN_PAIRS.slice(0, 8),
+        quizCount: 5,
         cols: 4,
-        label: 'Sehr Leicht'
     },
     easy: {
-        pairs: GREEN_PAIRS,           // 12 grüne Paare
-        time: 90,
-        quiz: false,
+        pairs: GREEN_PAIRS,
+        quizCount: 8,
         cols: 6,
-        label: 'Leicht'
     },
     medium: {
-        pairs: [...GREEN_PAIRS, ...YELLOW_PAIRS],   // 23 Paare
-        time: 180,
-        quiz: true,
+        pairs: [...GREEN_PAIRS, ...YELLOW_PAIRS],
+        quizCount: 12,
         cols: 8,
-        label: 'Mittel'
     },
     hard: {
-        pairs: ALL_PAIRS,             // 32 Paare
-        time: 300,
-        quiz: true,
+        pairs: ALL_PAIRS,
+        quizCount: 15,
         cols: 8,
-        label: 'Schwer'
     }
 };
 
@@ -75,19 +101,38 @@ function shuffle(arr) {
 }
 
 /* ===========================================================
-   GAME INIT
+   SCREEN HELPERS
    =========================================================== */
-btnStart.addEventListener('click', startGame);
-btnRestart.addEventListener('click', () => {
+function hideAll() {
+    startScreen.style.display = 'none';
+    gameScreen.style.display = 'none';
+    transitionScreen.style.display = 'none';
+    quizScreen.style.display = 'none';
     endScreen.style.display = 'none';
-    startScreen.style.display = 'block';
-    startScreen.style.animation = 'fadeUp 0.5s ease-out';
-});
+}
 
-function startGame() {
+function showScreen(el) {
+    hideAll();
+    el.style.display = el.id === 'game-screen' || el.id === 'quiz-screen' ? 'block' : '';
+    if (el.style.display === '') el.style.display = 'block';
+    el.style.animation = 'fadeUp 0.5s ease-out';
+}
+
+/* ===========================================================
+   INIT  –  Event Listeners
+   =========================================================== */
+btnStart.addEventListener('click', startPhase1);
+btnStartQuiz.addEventListener('click', startPhase2);
+btnRestart.addEventListener('click', () => showScreen(startScreen));
+btnSkipToQuiz.addEventListener('click', () => showTransition());
+
+/* ═══════════════════════════════════════════════════════════
+   ██  PHASE 1: MEMORY (Lernphase)
+   ═══════════════════════════════════════════════════════════ */
+function startPhase1() {
     // Reset state
     matchedCount = 0;
-    score = 0;
+    accumulatedTime = BASE_TIME;
     flippedCards = [];
     lockBoard = false;
     cards = [];
@@ -97,52 +142,30 @@ function startGame() {
     const config = DIFFICULTY_CONFIG[difficulty];
     const selectedPairs = shuffle([...config.pairs]);
     totalPairs = selectedPairs.length;
-    timeLeft = config.time;
 
-    // Track which tiers are used (for the legend)
     const activeTiers = new Set();
 
-    // Build card array: each pair → 2 cards sharing a pairId
+    // Build card array
     selectedPairs.forEach((pair, i) => {
         activeTiers.add(pair.tier);
         cards.push({
-            id: `p${i}-a`,
-            pairId: i,
-            text: pair.term,
-            type: 'normal',
-            tier: pair.tier,
-            image: pair.image || null
+            id: `p${i}-a`, pairId: i, text: pair.term,
+            type: 'normal', tier: pair.tier, image: pair.image || null
         });
         cards.push({
-            id: `p${i}-b`,
-            pairId: i,
-            text: pair.match,
-            type: 'normal',
-            tier: pair.tier,
-            image: null   // image only on term card
+            id: `p${i}-b`, pairId: i, text: pair.match,
+            type: 'normal', tier: pair.tier, image: null
         });
     });
 
-    // Add quiz cards on medium/hard
-    if (config.quiz) {
-        cards.push({ id: 'quiz-1', pairId: -1, text: '❓ Quiz-Karte', type: 'quiz', tier: null });
-        cards.push({ id: 'quiz-2', pairId: -2, text: '❓ Quiz-Karte', type: 'quiz', tier: null });
-    }
-
     shuffle(cards);
 
-    // Set grid columns
-    const total = cards.length;
+    // Grid columns
     let cols = config.cols;
-    // For smaller screens, limit columns
-    if (window.innerWidth < 500) {
-        cols = Math.min(cols, 4);
-    } else if (window.innerWidth < 700) {
-        cols = Math.min(cols, 6);
-    }
+    if (window.innerWidth < 500) cols = Math.min(cols, 4);
+    else if (window.innerWidth < 700) cols = Math.min(cols, 6);
     boardEl.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
 
-    // Build legend
     buildLegend(activeTiers);
 
     // Render cards
@@ -151,12 +174,9 @@ function startGame() {
         el.classList.add('card');
         el.dataset.id = card.id;
         el.dataset.pairId = card.pairId;
-        el.dataset.type = card.type;
 
-        const isQuiz = card.type === 'quiz';
         const tierClass = card.tier ? `tier-${card.tier}` : '';
 
-        // Build front content
         let frontContent = '';
         if (card.image) {
             frontContent += `<img src="${card.image}" class="card-img" alt="" onerror="this.style.display='none'" />`;
@@ -165,12 +185,12 @@ function startGame() {
 
         el.innerHTML = `
           <div class="card-inner">
-            <div class="card-face card-back ${isQuiz ? 'quiz-back' : ''}">
-              <span class="card-pattern">${isQuiz ? '❓' : '🍃'}</span>
-              ${!isQuiz && card.tier ? `<span class="tier-stripe ${card.tier}"></span>` : ''}
+            <div class="card-face card-back">
+              <span class="card-pattern">🍃</span>
+              ${card.tier ? `<span class="tier-stripe ${card.tier}"></span>` : ''}
             </div>
-            <div class="card-face card-front ${isQuiz ? 'quiz-face' : tierClass}">
-              ${isQuiz ? card.text : frontContent}
+            <div class="card-face card-front ${tierClass}">
+              ${frontContent}
             </div>
           </div>
         `;
@@ -179,16 +199,11 @@ function startGame() {
         boardEl.appendChild(el);
     });
 
-    // Update HUD
-    updateHUD();
+    // HUD
+    timerEl.textContent = accumulatedTime;
+    pairsLeftEl.textContent = totalPairs;
 
-    // Switch screens
-    startScreen.style.display = 'none';
-    gameScreen.style.display = 'block';
-    gameScreen.style.animation = 'fadeUp 0.5s ease-out';
-
-    // Start timer
-    startTimer();
+    showScreen(gameScreen);
 }
 
 /* ===========================================================
@@ -200,65 +215,23 @@ function buildLegend(activeTiers) {
     const tierOrder = ['green', 'yellow', 'red'];
     tierOrder.forEach(tier => {
         if (!activeTiers.has(tier)) return;
-        const pts = TIER_POINTS[tier];
+        const bonus = TIER_TIME_BONUS[tier];
         const label = TIER_LABELS[tier];
         const item = document.createElement('div');
         item.className = 'legend-item';
-        item.innerHTML = `<span class="legend-dot ${tier}"></span>${label} (${pts} Pkt.)`;
+        item.innerHTML = `<span class="legend-dot ${tier}"></span>${label} (+${bonus}s)`;
         legendEl.appendChild(item);
     });
 }
 
 /* ===========================================================
-   TIMER
-   =========================================================== */
-function startTimer() {
-    clearInterval(timerInterval);
-    timerInterval = setInterval(() => {
-        timeLeft--;
-        timerEl.textContent = timeLeft;
-
-        if (timeLeft <= 10) {
-            timerEl.style.color = '#c96b6b';
-        } else {
-            timerEl.style.color = '';
-        }
-
-        if (timeLeft <= 0) {
-            clearInterval(timerInterval);
-            endGame(false);
-        }
-    }, 1000);
-}
-
-/* ===========================================================
-   CARD CLICK HANDLER
+   CARD CLICK HANDLER (Phase 1)
    =========================================================== */
 function handleCardClick(el, card) {
     if (lockBoard) return;
     if (el.classList.contains('flipped') || el.classList.contains('matched')) return;
 
     el.classList.add('flipped');
-
-    // ---- QUIZ CARD ----
-    if (card.type === 'quiz') {
-        lockBoard = true;
-        setTimeout(() => {
-            showQuizModal(() => {
-                el.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
-                el.style.opacity = '0';
-                el.style.transform = 'scale(0.8)';
-                setTimeout(() => {
-                    el.style.visibility = 'hidden';
-                    el.style.pointerEvents = 'none';
-                    lockBoard = false;
-                }, 400);
-            });
-        }, 500);
-        return;
-    }
-
-    // ---- NORMAL CARD ----
     flippedCards.push({ el, card });
 
     if (flippedCards.length === 2) {
@@ -266,21 +239,24 @@ function handleCardClick(el, card) {
         const [first, second] = flippedCards;
 
         if (first.card.pairId === second.card.pairId) {
-            // ✅ Match found
+            // ✅ Match
             first.el.classList.add('matched');
             second.el.classList.add('matched');
             matchedCount++;
 
-            // Points based on tier
-            const pts = TIER_POINTS[first.card.tier] || 100;
-            addScore(pts);
-            addTime(5, first.el);
+            // Earn time based on tier
+            const bonus = TIER_TIME_BONUS[first.card.tier] || 3;
+            accumulatedTime += bonus;
+            timerEl.textContent = accumulatedTime;
+            showBonusFloat(`+${bonus}s`, first.el);
+
             flippedCards = [];
             lockBoard = false;
-            updateHUD();
+            pairsLeftEl.textContent = totalPairs - matchedCount;
 
+            // All pairs found → transition to Quiz
             if (matchedCount === totalPairs) {
-                setTimeout(() => endGame(true), 600);
+                setTimeout(() => showTransition(), 700);
             }
         } else {
             // ❌ No match
@@ -295,30 +271,12 @@ function handleCardClick(el, card) {
 }
 
 /* ===========================================================
-   SCORE & TIME HELPERS
-   =========================================================== */
-function addScore(amount) {
-    score += amount;
-    scoreEl.textContent = score;
-}
-
-function addTime(seconds, anchorEl) {
-    timeLeft += seconds;
-    timerEl.textContent = timeLeft;
-    showBonusFloat(`+${seconds}s`, anchorEl);
-}
-
-function updateHUD() {
-    scoreEl.textContent = score;
-    timerEl.textContent = timeLeft;
-    pairsLeftEl.textContent = totalPairs - matchedCount;
-}
-
-/* ===========================================================
    FLOATING BONUS TEXT
    =========================================================== */
 function showBonusFloat(text, anchorEl) {
-    const rect = anchorEl ? anchorEl.getBoundingClientRect() : { left: window.innerWidth / 2, top: window.innerHeight / 2 };
+    const rect = anchorEl
+        ? anchorEl.getBoundingClientRect()
+        : { left: window.innerWidth / 2, top: window.innerHeight / 2, width: 0 };
     const span = document.createElement('span');
     span.className = 'bonus-float';
     span.textContent = text;
@@ -329,75 +287,144 @@ function showBonusFloat(text, anchorEl) {
 }
 
 /* ===========================================================
-   QUIZ MODAL
+   TRANSITION (Memory → Quiz)
    =========================================================== */
-function showQuizModal(onClose) {
-    const q = QUIZ_QUESTIONS[Math.floor(Math.random() * QUIZ_QUESTIONS.length)];
+function showTransition() {
+    transitionTimeEl.textContent = accumulatedTime;
+    showScreen(transitionScreen);
+}
 
-    const overlay = document.createElement('div');
-    overlay.className = 'modal-overlay';
+/* ═══════════════════════════════════════════════════════════
+   ██  PHASE 2: QUIZ (Abfragephase)
+   ═══════════════════════════════════════════════════════════ */
+function startPhase2() {
+    const difficulty = diffSelect.value;
+    const config = DIFFICULTY_CONFIG[difficulty];
 
-    const modal = document.createElement('div');
-    modal.className = 'modal glass';
+    // Prepare quiz questions
+    quizQuestions = shuffle([...QUIZ_QUESTIONS]).slice(0, config.quizCount);
+    currentQuizIndex = 0;
+    quizScore = 0;
+    quizCorrect = 0;
+    quizTotal = quizQuestions.length;
+    quizTimeLeft = accumulatedTime;
 
-    modal.innerHTML = `
-        <h2>⚡ Quiz-Frage</h2>
-        <p class="question">${q.question}</p>
-        <div class="choices"></div>
-    `;
+    // Update HUD
+    quizTimerEl.textContent = quizTimeLeft;
+    quizScoreEl.textContent = 0;
+    quizProgressEl.textContent = `1/${quizTotal}`;
 
-    const choicesDiv = modal.querySelector('.choices');
+    showScreen(quizScreen);
+    showQuizQuestion();
+    startQuizTimer();
+}
+
+/* ===========================================================
+   QUIZ TIMER
+   =========================================================== */
+function startQuizTimer() {
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+        quizTimeLeft--;
+        quizTimerEl.textContent = quizTimeLeft;
+
+        if (quizTimeLeft <= 10) {
+            quizTimerEl.style.color = '#c96b6b';
+        } else {
+            quizTimerEl.style.color = '';
+        }
+
+        if (quizTimeLeft <= 0) {
+            clearInterval(timerInterval);
+            endGame(false);
+        }
+    }, 1000);
+}
+
+/* ===========================================================
+   SHOW QUIZ QUESTION
+   =========================================================== */
+function showQuizQuestion() {
+    if (currentQuizIndex >= quizTotal) {
+        clearInterval(timerInterval);
+        endGame(true);
+        return;
+    }
+
+    const q = quizQuestions[currentQuizIndex];
+    quizProgressEl.textContent = `${currentQuizIndex + 1}/${quizTotal}`;
+    quizQuestionEl.textContent = q.question;
+    quizChoicesEl.innerHTML = '';
+
+    // Animate card
+    const card = document.getElementById('quiz-card');
+    card.style.animation = 'none';
+    // Force reflow
+    void card.offsetHeight;
+    card.style.animation = 'scaleUp 0.3s ease-out';
 
     q.choices.forEach((choice) => {
         const btn = document.createElement('button');
         btn.className = 'choice-btn';
         btn.textContent = choice.text;
+
         btn.addEventListener('click', () => {
-            choicesDiv.querySelectorAll('.choice-btn').forEach(b => {
+            // Disable all
+            quizChoicesEl.querySelectorAll('.choice-btn').forEach(b => {
                 b.disabled = true;
                 b.style.pointerEvents = 'none';
             });
 
             if (choice.correct) {
                 btn.classList.add('correct');
-                addScore(200);
-                addTime(15, modal);
+                quizScore += 100;
+                quizCorrect++;
+                quizScoreEl.textContent = quizScore;
             } else {
                 btn.classList.add('wrong');
-                const correctBtn = [...choicesDiv.querySelectorAll('.choice-btn')]
-                    .find((b) => b.textContent === q.choices.find(c => c.correct).text);
+                // Highlight correct
+                const correctBtn = [...quizChoicesEl.querySelectorAll('.choice-btn')]
+                    .find(b => b.textContent === q.choices.find(c => c.correct).text);
                 if (correctBtn) correctBtn.classList.add('correct');
+                // Time penalty
+                quizTimeLeft = Math.max(0, quizTimeLeft - 5);
+                quizTimerEl.textContent = quizTimeLeft;
+                showBonusFloat('−5s', btn);
+                if (quizTimeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    setTimeout(() => endGame(false), 800);
+                    return;
+                }
             }
 
+            // Next question after delay
             setTimeout(() => {
-                overlay.remove();
-                onClose();
+                currentQuizIndex++;
+                showQuizQuestion();
             }, 1000);
         });
-        choicesDiv.appendChild(btn);
-    });
 
-    overlay.appendChild(modal);
-    document.body.appendChild(overlay);
+        quizChoicesEl.appendChild(btn);
+    });
 }
 
 /* ===========================================================
    END GAME
    =========================================================== */
-function endGame(won) {
+function endGame(allAnswered) {
     clearInterval(timerInterval);
-    gameScreen.style.display = 'none';
-    endScreen.style.display = 'block';
-    endScreen.style.animation = 'fadeUp 0.6s ease-out';
 
-    if (won) {
+    if (allAnswered) {
         endTitle.textContent = '🎉 Geschafft!';
-        endMessage.textContent = 'Stark! Du hast alle Paare gefunden.';
+        endMessage.textContent = 'Du hast alle Fragen beantwortet!';
     } else {
         endTitle.textContent = '⏰ Zeit abgelaufen!';
-        endMessage.textContent = `Du hast ${matchedCount} von ${totalPairs} Paaren gefunden.`;
+        endMessage.textContent = `Du hast ${currentQuizIndex} von ${quizTotal} Fragen geschafft.`;
     }
 
-    finalScoreEl.textContent = score;
-    finalTimeEl.textContent = won ? `${timeLeft}s` : '0s';
+    finalScoreEl.textContent = quizScore;
+    finalCorrectEl.textContent = `${quizCorrect}/${quizTotal}`;
+    finalTimeEl.textContent = allAnswered ? `${quizTimeLeft}s` : '0s';
+
+    showScreen(endScreen);
 }

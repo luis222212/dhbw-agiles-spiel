@@ -27,9 +27,9 @@
             <label for="difficulty">Schwierigkeit</label>
             <select id="difficulty">
                 <option value="very-easy">Sehr Leicht – 8 Paare</option>
-                <option value="easy">Leicht – 12 Paare (Grün)</option>
-                <option value="medium" selected>Mittel – 23 Paare (Grün + Gelb)</option>
-                <option value="hard">Schwer – 32 Paare (Alle + Quiz)</option>
+                <option value="easy">Leicht – 12 Paare</option>
+                <option value="medium" selected>Mittel – 23 Paare</option>
+                <option value="hard">Schwer – 32 Paare</option>
             </select>
         </div>
 
@@ -39,22 +39,20 @@
     </div>
 
     <!-- ===========================
-       GAME SCREEN
+       PHASE 1: MEMORY (Lernphase)
        =========================== -->
     <div id="game-screen">
+        <div class="phase-banner glass">
+            <span class="phase-icon">📖</span>
+            <span class="phase-text">Phase 1 – Lernphase</span>
+        </div>
+
         <div class="hud glass">
             <div class="hud-item">
                 <span class="hud-icon">⏱️</span>
                 <div>
-                    <div class="hud-label">Zeit</div>
-                    <div class="hud-value" id="timer">60</div>
-                </div>
-            </div>
-            <div class="hud-item">
-                <span class="hud-icon">⭐</span>
-                <div>
-                    <div class="hud-label">Score</div>
-                    <div class="hud-value" id="score">0</div>
+                    <div class="hud-label">Gesammelte Zeit</div>
+                    <div class="hud-value" id="timer">45</div>
                 </div>
             </div>
             <div class="hud-item">
@@ -68,6 +66,64 @@
 
         <div id="legend" class="legend"></div>
         <div id="board"></div>
+
+        <button id="btn-skip-to-quiz" class="btn-skip">
+            Weiter zum Quiz ➜
+        </button>
+    </div>
+
+    <!-- ===========================
+       TRANSITION SCREEN
+       =========================== -->
+    <div id="transition-screen" class="glass">
+        <div class="trophy">🎓</div>
+        <h2>Lernphase abgeschlossen!</h2>
+        <p class="result-text">
+            Du hast <strong id="transition-time">0</strong> Sekunden gesammelt.<br>
+            Jetzt wird dein Wissen getestet!
+        </p>
+        <button id="btn-start-quiz" class="btn-primary">
+            ⚡ Quiz starten
+        </button>
+    </div>
+
+    <!-- ===========================
+       PHASE 2: QUIZ (Abfragephase)
+       =========================== -->
+    <div id="quiz-screen">
+        <div class="phase-banner glass phase-quiz">
+            <span class="phase-icon">⚡</span>
+            <span class="phase-text">Phase 2 – Quiz</span>
+        </div>
+
+        <div class="hud glass">
+            <div class="hud-item">
+                <span class="hud-icon">⏱️</span>
+                <div>
+                    <div class="hud-label">Restzeit</div>
+                    <div class="hud-value" id="quiz-timer">0</div>
+                </div>
+            </div>
+            <div class="hud-item">
+                <span class="hud-icon">⭐</span>
+                <div>
+                    <div class="hud-label">Score</div>
+                    <div class="hud-value" id="quiz-score">0</div>
+                </div>
+            </div>
+            <div class="hud-item">
+                <span class="hud-icon">📝</span>
+                <div>
+                    <div class="hud-label">Frage</div>
+                    <div class="hud-value" id="quiz-progress">1/10</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="quiz-card glass" id="quiz-card">
+            <h2 id="quiz-question">…</h2>
+            <div id="quiz-choices" class="choices"></div>
+        </div>
     </div>
 
     <!-- ===========================
@@ -76,11 +132,15 @@
     <div id="end-screen" class="glass">
         <div class="trophy">🏆</div>
         <h2 id="end-title">Geschafft!</h2>
-        <p class="result-text" id="end-message">Du hast alle Paare gefunden.</p>
+        <p class="result-text" id="end-message">Du hast alle Fragen beantwortet.</p>
         <div class="stat-row">
             <div class="stat">
                 <div class="stat-val" id="final-score">0</div>
                 <div class="stat-label">Punkte</div>
+            </div>
+            <div class="stat">
+                <div class="stat-val" id="final-correct">0</div>
+                <div class="stat-label">Richtig</div>
             </div>
             <div class="stat">
                 <div class="stat-val" id="final-time">0s</div>
@@ -91,7 +151,7 @@
     </div>
 
     <!-- ===========================
-       SCRIPTS (data first, then game logic)
+       SCRIPTS
        =========================== -->
     <script src="js/data.js"></script>
     <script src="js/game.js"></script>

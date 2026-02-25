@@ -209,7 +209,43 @@ body::after {
 }
 
 /* =========================================================
-   GAME SCREEN
+   PHASE BANNER
+   ========================================================= */
+.phase-banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px 20px;
+    margin-bottom: 14px;
+    text-align: center;
+    background: rgba(168, 198, 161, 0.25);
+    border: 1px solid rgba(125, 165, 118, 0.3);
+}
+
+.phase-banner .phase-icon {
+    font-size: 1.2rem;
+}
+
+.phase-banner .phase-text {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--matcha-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+
+.phase-banner.phase-quiz {
+    background: rgba(245, 189, 80, 0.15);
+    border-color: rgba(212, 168, 67, 0.3);
+}
+
+.phase-banner.phase-quiz .phase-text {
+    color: var(--tier-yellow-text);
+}
+
+/* =========================================================
+   GAME SCREEN (Phase 1 - Memory)
    ========================================================= */
 #game-screen {
     display: none;
@@ -218,14 +254,14 @@ body::after {
     animation: fadeUp 0.5s ease-out;
 }
 
-/* HUD – Score & Timer */
+/* HUD */
 .hud {
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
     gap: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 14px;
     padding: 14px 20px;
 }
 
@@ -253,12 +289,12 @@ body::after {
     color: var(--matcha-dark);
 }
 
-/* Legend (Tier anzeige) */
+/* Legend */
 .legend {
     display: flex;
     justify-content: center;
     gap: 16px;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
     flex-wrap: wrap;
 }
 
@@ -293,11 +329,33 @@ body::after {
     border-color: var(--tier-red-border);
 }
 
-/* Board Grid */
+/* Board */
 #board {
     display: grid;
     gap: 10px;
     padding: 4px;
+}
+
+/* Skip to quiz button */
+.btn-skip {
+    display: block;
+    margin: 18px auto 0;
+    padding: 12px 28px;
+    font-family: inherit;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--matcha-dark);
+    background: rgba(255, 255, 255, 0.6);
+    border: 2px solid var(--matcha);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+}
+
+.btn-skip:hover {
+    background: var(--matcha-light);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(125, 165, 118, 0.3);
 }
 
 /* =========================================================
@@ -318,10 +376,7 @@ body::after {
     transform-style: preserve-3d;
 }
 
-.card.flipped .card-inner {
-    transform: rotateY(180deg);
-}
-
+.card.flipped .card-inner,
 .card.matched .card-inner {
     transform: rotateY(180deg);
 }
@@ -343,7 +398,6 @@ body::after {
     overflow: hidden;
 }
 
-/* BACK (hidden by default, visible when flipped) */
 .card-back {
     background: linear-gradient(145deg, var(--matcha-light), var(--matcha));
     color: var(--white);
@@ -355,7 +409,6 @@ body::after {
     opacity: 0.65;
 }
 
-/* Tier-Streifen auf Kartenrücken */
 .card-back .tier-stripe {
     position: absolute;
     bottom: 0;
@@ -376,7 +429,6 @@ body::after {
     background: var(--tier-red-border);
 }
 
-/* FRONT (text content) */
 .card-front {
     background: var(--white);
     color: var(--text);
@@ -385,7 +437,6 @@ body::after {
     transform: rotateY(180deg);
 }
 
-/* ── Tier-Farben auf der Vorderseite ── */
 .card-front.tier-green {
     background: var(--tier-green-bg);
     border-color: var(--tier-green-border);
@@ -404,7 +455,6 @@ body::after {
     color: var(--tier-red-text);
 }
 
-/* ── Bild auf Karte ── */
 .card-img {
     max-width: 85%;
     max-height: 50%;
@@ -420,7 +470,6 @@ body::after {
     text-overflow: ellipsis;
 }
 
-/* Card states */
 .card.matched {
     pointer-events: none;
 }
@@ -431,18 +480,6 @@ body::after {
 
 .card.matched .card-inner {
     animation: popMatch 0.4s ease;
-}
-
-/* Quiz card special styling */
-.card-front.quiz-face {
-    background: linear-gradient(135deg, #f5eaff, #e6d9f2);
-    border-color: #d4c4e3;
-    color: #6b5080;
-    font-weight: 600;
-}
-
-.card-back.quiz-back {
-    background: linear-gradient(145deg, #e8d8f5, #c9a7e4);
 }
 
 @keyframes popMatch {
@@ -474,6 +511,10 @@ body::after {
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
+.bonus-float.penalty {
+    color: var(--tier-red-text);
+}
+
 @keyframes bonusUp {
     0% {
         opacity: 1;
@@ -487,51 +528,72 @@ body::after {
 }
 
 /* =========================================================
-   QUIZ MODAL
+   TRANSITION SCREEN
    ========================================================= */
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.35);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    z-index: 900;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    animation: fadeIn 0.25s ease;
-}
-
-.modal {
-    max-width: 420px;
-    width: 100%;
-    padding: 32px 28px;
+#transition-screen {
+    display: none;
     text-align: center;
-    animation: scaleUp 0.35s cubic-bezier(.4, 0, .2, 1);
+    padding: 48px 36px;
+    max-width: 460px;
+    width: 100%;
+    animation: fadeUp 0.6s ease-out;
 }
 
-.modal h2 {
-    font-size: 1.3rem;
-    font-weight: 600;
+#transition-screen .trophy {
+    font-size: 3.5rem;
+    margin-bottom: 12px;
+}
+
+#transition-screen h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
     color: var(--matcha-dark);
-    margin-bottom: 8px;
+    margin-bottom: 10px;
 }
 
-.modal p.question {
-    font-size: 0.95rem;
+#transition-screen .result-text {
+    font-size: 1rem;
+    color: var(--text-light);
+    margin-bottom: 28px;
+    line-height: 1.6;
+}
+
+#transition-screen strong {
+    color: var(--matcha-dark);
+    font-weight: 700;
+    font-size: 1.3rem;
+}
+
+/* =========================================================
+   QUIZ SCREEN (Phase 2)
+   ========================================================= */
+#quiz-screen {
+    display: none;
+    width: 100%;
+    max-width: 600px;
+    animation: fadeUp 0.5s ease-out;
+}
+
+.quiz-card {
+    padding: 36px 28px;
+    text-align: center;
+}
+
+.quiz-card h2 {
+    font-size: 1.2rem;
+    font-weight: 600;
     color: var(--text);
     margin-bottom: 24px;
     line-height: 1.5;
 }
 
-.modal .choices {
+.choices {
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
 
-.modal .choice-btn {
+.choice-btn {
     padding: 14px;
     border: 1px solid var(--light-gray);
     border-radius: var(--radius-sm);
@@ -543,20 +605,20 @@ body::after {
     transition: background var(--transition), border-color var(--transition), transform var(--transition);
 }
 
-.modal .choice-btn:hover {
+.choice-btn:hover {
     background: var(--matcha-light);
     border-color: var(--matcha);
     transform: translateY(-1px);
 }
 
-.modal .choice-btn.correct {
+.choice-btn.correct {
     background: var(--matcha-light);
     border-color: var(--matcha-dark);
     color: var(--matcha-dark);
     font-weight: 600;
 }
 
-.modal .choice-btn.wrong {
+.choice-btn.wrong {
     background: #fce8e8;
     border-color: var(--danger);
     color: #9a4444;
@@ -581,7 +643,7 @@ body::after {
     display: none;
     text-align: center;
     padding: 48px 36px;
-    max-width: 440px;
+    max-width: 460px;
     width: 100%;
     animation: fadeUp 0.6s ease-out;
 }
@@ -609,7 +671,7 @@ body::after {
 #end-screen .stat-row {
     display: flex;
     justify-content: center;
-    gap: 32px;
+    gap: 28px;
     margin-bottom: 32px;
 }
 
@@ -618,7 +680,7 @@ body::after {
 }
 
 #end-screen .stat-val {
-    font-size: 2rem;
+    font-size: 1.8rem;
     font-weight: 700;
     color: var(--matcha-dark);
 }
@@ -661,7 +723,8 @@ body::after {
 @media (max-width: 600px) {
 
     #start-screen,
-    #end-screen {
+    #end-screen,
+    #transition-screen {
         padding: 32px 20px;
     }
 
@@ -688,6 +751,14 @@ body::after {
 
     .card-img {
         max-height: 40%;
+    }
+
+    .quiz-card {
+        padding: 28px 20px;
+    }
+
+    .quiz-card h2 {
+        font-size: 1.05rem;
     }
 }
 
