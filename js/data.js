@@ -204,7 +204,7 @@ const TIER_LABELS = {
     red: 'Schwer',
 };
 
-// ── Quiz-Fragen ───────────────────────────────────────────
+// ── Quiz-Fragen (15 Stück für Abwechslung) ───────────────
 const QUIZ_QUESTIONS = [
     {
         question: 'Wie oft wechselt man zwischen Theorie und Praxis?',
@@ -244,6 +244,86 @@ const QUIZ_QUESTIONS = [
             { text: 'A: über 50 %', correct: false },
             { text: 'B: über 80 %', correct: true },
             { text: 'C: über 95 %', correct: false },
+        ],
+    },
+    {
+        question: 'In welchem Jahr wurde die Berufsakademie Stuttgart gegründet?',
+        choices: [
+            { text: 'A: 1970', correct: false },
+            { text: 'B: 1974', correct: true },
+            { text: 'C: 1980', correct: false },
+        ],
+    },
+    {
+        question: 'Wie viele ECTS-Punkte umfasst ein Bachelor an der DHBW?',
+        choices: [
+            { text: 'A: 180', correct: false },
+            { text: 'B: 210', correct: true },
+            { text: 'C: 240', correct: false },
+        ],
+    },
+    {
+        question: 'Wo befindet sich das Rektorat der DHBW Stuttgart?',
+        choices: [
+            { text: 'A: Lerchenstraße 1', correct: false },
+            { text: 'B: Rotebühlstraße 133', correct: true },
+            { text: 'C: Herdweg 21', correct: false },
+        ],
+    },
+    {
+        question: 'Wie viele duale Partner hat die DHBW Stuttgart ungefähr?',
+        choices: [
+            { text: 'A: 500', correct: false },
+            { text: 'B: 2.000', correct: true },
+            { text: 'C: 5.000', correct: false },
+        ],
+    },
+    {
+        question: 'Wie heißt das Verwaltungssystem der DHBW?',
+        choices: [
+            { text: 'A: CAMPUS', correct: false },
+            { text: 'B: DUALIS', correct: true },
+            { text: 'C: MOODLE', correct: false },
+        ],
+    },
+    {
+        question: 'Wie niedrig ist die Abbrecherquote an der DHBW?',
+        choices: [
+            { text: 'A: unter 10 %', correct: true },
+            { text: 'B: unter 25 %', correct: false },
+            { text: 'C: unter 40 %', correct: false },
+        ],
+    },
+    {
+        question: 'Welcher Studiengang belegt Platz 1 im manager-magazin-Ranking?',
+        choices: [
+            { text: 'A: BWL-Industrie', correct: false },
+            { text: 'B: Wirtschaftsprüfung (RSW)', correct: true },
+            { text: 'C: Informatik', correct: false },
+        ],
+    },
+    {
+        question: 'Wann feiert die DHBW Stuttgart ihr 50-jähriges Jubiläum?',
+        choices: [
+            { text: 'A: 2022', correct: false },
+            { text: 'B: 2024', correct: true },
+            { text: 'C: 2029', correct: false },
+        ],
+    },
+    {
+        question: 'Wie viele Studierende hat der Campus Horb ungefähr?',
+        choices: [
+            { text: 'A: 300', correct: false },
+            { text: 'B: 900', correct: true },
+            { text: 'C: 2.500', correct: false },
+        ],
+    },
+    {
+        question: 'Wie viele Professoren hat die DHBW Stuttgart?',
+        choices: [
+            { text: 'A: 85', correct: false },
+            { text: 'B: 192', correct: true },
+            { text: 'C: 350', correct: false },
         ],
     },
 ];

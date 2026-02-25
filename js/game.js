@@ -33,6 +33,13 @@ let lockBoard = false;
    DIFFICULTY CONFIG
    =========================================================== */
 const DIFFICULTY_CONFIG = {
+    'very-easy': {
+        pairs: GREEN_PAIRS.slice(0, 8),   // 8 grüne Paare
+        time: 60,
+        quiz: false,
+        cols: 4,
+        label: 'Sehr Leicht'
+    },
     easy: {
         pairs: GREEN_PAIRS,           // 12 grüne Paare
         time: 90,
