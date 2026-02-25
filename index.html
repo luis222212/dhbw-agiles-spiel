@@ -23,6 +23,57 @@
         <div class="logo">Match<span>Mind</span></div>
         <p class="tagline">Finde deinen Weg</p>
 
+        <details style="margin: 20px 0; text-align: left; max-width: 600px;">
+            <summary style="cursor: pointer; font-weight: 600; font-size: 1.1rem; margin-bottom: 10px; text-align: center;">📖 Anleitung</summary>
+            <div style="padding: 15px; line-height: 1.6; font-size: 0.95rem;">
+                <p style="margin-bottom: 15px;"><strong>🎮 MatchMind</strong><br>
+                <strong>Spieleranzahl:</strong> 2–4 Spieler<br>
+                <strong>Altersempfehlung:</strong> ab 8+ Jahren<br>
+                <strong>Spieldauer:</strong> ca. 10–20 Minuten (je nach Spielmodus)</p>
+
+                <p style="margin-bottom: 10px;"><strong>🎯 Ziel des Spiels</strong></p>
+                <p style="margin-bottom: 15px;">MatchMind verbindet klassisches Memory mit einer Quiz-Runde. Ziel ist es, sich möglichst viele Karteninhalte zu merken, Paare zu finden und anschließend in der Quizphase die meisten Fragen richtig zu beantworten. Gewinner ist die Person mit den meisten Punkten am Ende des Spiels.</p>
+
+                <p style="margin-bottom: 10px;"><strong>🛠 Spielvorbereitung</strong></p>
+                <p style="margin-bottom: 15px;">Zu Beginn wählen die Spieler gemeinsam einen Spielmodus:</p>
+                <ul style="margin: 10px 0 15px 20px;">
+                    <li>Sehr leicht: 8 Kartenpaare</li>
+                    <li>Leicht: 12 Kartenpaare</li>
+                    <li>Mittel: 23 Kartenpaare</li>
+                    <li>Schwer: 32 Kartenpaare</li>
+                </ul>
+                <p style="margin-bottom: 15px;">Nach der Auswahl wird das Spiel gestartet. Das Spielfeld erscheint mit allen Karten verdeckt. Jede Partie beginnt mit einem Starttimer von 45 Sekunden.</p>
+
+                <p style="margin-bottom: 10px;"><strong>🔄 Spielablauf – Phase 1: Memo-Runde</strong></p>
+                <ul style="margin: 10px 0 15px 20px;">
+                    <li>Die Spieler sind abwechselnd am Zug.</li>
+                    <li>Ein Spieler deckt zwei Karten auf.</li>
+                    <li>Stimmen die Karten überein, gilt das Paar als gefunden.</li>
+                    <li>Für jedes gefundene Paar erhält der Spieler +3 Sekunden Bonuszeit.</li>
+                    <li>Stimmen die Karten nicht überein, werden sie wieder verdeckt und der nächste Spieler ist an der Reihe.</li>
+                    <li>Sobald alle Kartenpaare gefunden wurden, beginnt automatisch die zweite Phase.</li>
+                </ul>
+
+                <p style="margin-bottom: 10px;"><strong>🧠 Spielablauf – Phase 2: Quiz-Runde</strong></p>
+                <p style="margin-bottom: 10px;">In der Quiz-Runde müssen die Spieler Fragen zu den Inhalten beantworten, die zuvor auf den Karten zu sehen waren.</p>
+                <ul style="margin: 10px 0 15px 20px;">
+                    <li>Der Timer läuft herunter.</li>
+                    <li>Ziel ist es, sich möglichst gut an die Motive, Begriffe oder Details der Karten zu erinnern.</li>
+                    <li>Jede richtig beantwortete Frage bringt 100 Punkte.</li>
+                    <li>Jede falsch beantwortete Frage zieht dir 5 Sekunden ab.</li>
+                </ul>
+
+                <p style="margin-bottom: 10px;"><strong>🏁 Spielende</strong></p>
+                <p style="margin-bottom: 10px;">Das Spiel endet, wenn der Timer abgelaufen ist oder alle Quizfragen beantwortet wurden.</p>
+                <p style="margin-bottom: 10px;">Gewinner ist die Person, die:</p>
+                <ul style="margin: 10px 0 15px 20px;">
+                    <li>die meisten Fragen richtig beantwortet hat</li>
+                    <li>und somit die höchste Gesamtpunktzahl erreicht</li>
+                </ul>
+                <p>Bei Gleichstand können die betroffenen Spieler eine zusätzliche Stichfrage erhalten.</p>
+            </div>
+        </details>
+
         <div class="form-group">
             <label for="difficulty">Schwierigkeit</label>
             <select id="difficulty">
@@ -35,6 +86,9 @@
 
         <button id="btn-start" class="btn-primary">
             🚀 Spiel starten
+        </button>
+        <button onclick="location.reload()" class="btn-primary" style="margin-top: 10px;">
+            🔄 Seite neu laden
         </button>
     </div>
 
@@ -70,6 +124,9 @@
         <button id="btn-skip-to-quiz" class="btn-skip">
             Weiter zum Quiz ➜
         </button>
+        <button onclick="location.reload()" class="btn-primary" style="margin-top: 10px;">
+            🔄 Seite neu laden
+        </button>
     </div>
 
     <!-- ===========================
@@ -84,6 +141,9 @@
         </p>
         <button id="btn-start-quiz" class="btn-primary">
             ⚡ Quiz starten
+        </button>
+        <button onclick="location.reload()" class="btn-primary" style="margin-top: 10px;">
+            🔄 Seite neu laden
         </button>
     </div>
 
@@ -124,6 +184,9 @@
             <h2 id="quiz-question">…</h2>
             <div id="quiz-choices" class="choices"></div>
         </div>
+        <button onclick="location.reload()" class="btn-primary" style="margin-top: 10px;">
+            🔄 Seite neu laden
+        </button>
     </div>
 
     <!-- ===========================
@@ -148,6 +211,9 @@
             </div>
         </div>
         <button id="btn-restart" class="btn-primary">🔄 Nochmal spielen</button>
+        <button onclick="location.reload()" class="btn-primary" style="margin-top: 10px;">
+            🔄 Seite neu laden
+        </button>
     </div>
 
     <!-- ===========================
